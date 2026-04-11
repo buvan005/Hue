@@ -1,0 +1,638 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {
+    "hyperedges": [
+      {
+        "id": "game_flow_components",
+        "label": "Game Phase Flow Components",
+        "nodes": [
+          "readme_colorstage_svelte",
+          "readme_sliders_svelte",
+          "readme_resultview_svelte",
+          "readme_endmodal_svelte"
+        ],
+        "relation": "form",
+        "confidence": "INFERRED",
+        "confidence_score": 0.85,
+        "source_file": "README.md"
+      },
+      {
+        "id": "hsb_color_consumers",
+        "label": "HSB Color Model Consumers",
+        "nodes": [
+          "readme_sliders_svelte",
+          "readme_colorstage_svelte",
+          "readme_colormath_utility"
+        ],
+        "relation": "share",
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "README.md"
+      },
+      {
+        "id": "design_rationale_decisions",
+        "label": "Key UX Design Decisions",
+        "nodes": [
+          "readme_dm_sans_font",
+          "readme_warm_background_rationale",
+          "readme_vertical_sliders_rationale",
+          "readme_score_animation_rationale",
+          "readme_adaptive_contrast_rationale"
+        ],
+        "relation": "form",
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "README.md"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "label": "Dialed Project",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_dialed_project",
+      "community": 1
+    },
+    {
+      "label": "App.svelte Component",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_app_svelte",
+      "community": 0
+    },
+    {
+      "label": "GameCard.svelte Component",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_gamecard_svelte",
+      "community": 0
+    },
+    {
+      "label": "ColorStage.svelte Component",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_colorstage_svelte",
+      "community": 0
+    },
+    {
+      "label": "Sliders.svelte Component",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_sliders_svelte",
+      "community": 0
+    },
+    {
+      "label": "ResultView.svelte Component",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_resultview_svelte",
+      "community": 2
+    },
+    {
+      "label": "ScoreDisplay.svelte Component",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_scoredisplay_svelte",
+      "community": 2
+    },
+    {
+      "label": "EndModal.svelte Component",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_endmodal_svelte",
+      "community": 2
+    },
+    {
+      "label": "Svelte Framework",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_svelte_framework",
+      "community": 1
+    },
+    {
+      "label": "Tailwind CSS",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_tailwind_css",
+      "community": 1
+    },
+    {
+      "label": "DM Sans Font",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_dm_sans_font",
+      "community": 1
+    },
+    {
+      "label": "HSB Color Model",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_hsb_color_model",
+      "community": 0
+    },
+    {
+      "label": "Delta E Scoring",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_delta_e_scoring",
+      "community": 2
+    },
+    {
+      "label": "Memorize Phase",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_memorize_phase",
+      "community": 3
+    },
+    {
+      "label": "Guess Phase",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_guess_phase",
+      "community": 3
+    },
+    {
+      "label": "Warm Background Design Decision",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_warm_background_rationale",
+      "community": 1
+    },
+    {
+      "label": "Vertical Sliders Design Decision",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_vertical_sliders_rationale",
+      "community": 0
+    },
+    {
+      "label": "Score Count-up Animation Design Decision",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_score_animation_rationale",
+      "community": 2
+    },
+    {
+      "label": "Adaptive Contrast Design Decision",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_adaptive_contrast_rationale",
+      "community": 0
+    },
+    {
+      "label": "ColorMath Utility Object",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_colormath_utility",
+      "community": 0
+    },
+    {
+      "label": "Vite Build Tool",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme_vite_build_tool",
+      "community": 1
+    }
+  ],
+  "links": [
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_dialed_project",
+      "_tgt": "readme_svelte_framework",
+      "source": "readme_dialed_project",
+      "target": "readme_svelte_framework"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_dialed_project",
+      "_tgt": "readme_tailwind_css",
+      "source": "readme_dialed_project",
+      "target": "readme_tailwind_css"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_dm_sans_font",
+      "_tgt": "readme_dialed_project",
+      "source": "readme_dialed_project",
+      "target": "readme_dm_sans_font"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_warm_background_rationale",
+      "_tgt": "readme_dialed_project",
+      "source": "readme_dialed_project",
+      "target": "readme_warm_background_rationale"
+    },
+    {
+      "relation": "contains",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_app_svelte",
+      "_tgt": "readme_gamecard_svelte",
+      "source": "readme_app_svelte",
+      "target": "readme_gamecard_svelte"
+    },
+    {
+      "relation": "orchestrates",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_app_svelte",
+      "_tgt": "readme_colorstage_svelte",
+      "source": "readme_app_svelte",
+      "target": "readme_colorstage_svelte"
+    },
+    {
+      "relation": "routes_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_gamecard_svelte",
+      "_tgt": "readme_colorstage_svelte",
+      "source": "readme_gamecard_svelte",
+      "target": "readme_colorstage_svelte"
+    },
+    {
+      "relation": "routes_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_gamecard_svelte",
+      "_tgt": "readme_sliders_svelte",
+      "source": "readme_gamecard_svelte",
+      "target": "readme_sliders_svelte"
+    },
+    {
+      "relation": "routes_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_gamecard_svelte",
+      "_tgt": "readme_resultview_svelte",
+      "source": "readme_gamecard_svelte",
+      "target": "readme_resultview_svelte"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_colorstage_svelte",
+      "_tgt": "readme_memorize_phase",
+      "source": "readme_colorstage_svelte",
+      "target": "readme_memorize_phase"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_colorstage_svelte",
+      "_tgt": "readme_hsb_color_model",
+      "source": "readme_colorstage_svelte",
+      "target": "readme_hsb_color_model"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_colorstage_svelte",
+      "_tgt": "readme_colormath_utility",
+      "source": "readme_colorstage_svelte",
+      "target": "readme_colormath_utility"
+    },
+    {
+      "relation": "implements",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_sliders_svelte",
+      "_tgt": "readme_guess_phase",
+      "source": "readme_sliders_svelte",
+      "target": "readme_guess_phase"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_sliders_svelte",
+      "_tgt": "readme_hsb_color_model",
+      "source": "readme_sliders_svelte",
+      "target": "readme_hsb_color_model"
+    },
+    {
+      "relation": "uses",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_sliders_svelte",
+      "_tgt": "readme_colormath_utility",
+      "source": "readme_sliders_svelte",
+      "target": "readme_colormath_utility"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_vertical_sliders_rationale",
+      "_tgt": "readme_sliders_svelte",
+      "source": "readme_sliders_svelte",
+      "target": "readme_vertical_sliders_rationale"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_adaptive_contrast_rationale",
+      "_tgt": "readme_sliders_svelte",
+      "source": "readme_sliders_svelte",
+      "target": "readme_adaptive_contrast_rationale"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_resultview_svelte",
+      "_tgt": "readme_scoredisplay_svelte",
+      "source": "readme_resultview_svelte",
+      "target": "readme_scoredisplay_svelte"
+    },
+    {
+      "relation": "displays",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_resultview_svelte",
+      "_tgt": "readme_delta_e_scoring",
+      "source": "readme_resultview_svelte",
+      "target": "readme_delta_e_scoring"
+    },
+    {
+      "relation": "flows_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_guess_phase",
+      "_tgt": "readme_resultview_svelte",
+      "source": "readme_resultview_svelte",
+      "target": "readme_guess_phase"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_endmodal_svelte",
+      "_tgt": "readme_scoredisplay_svelte",
+      "source": "readme_scoredisplay_svelte",
+      "target": "readme_endmodal_svelte"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_score_animation_rationale",
+      "_tgt": "readme_scoredisplay_svelte",
+      "source": "readme_scoredisplay_svelte",
+      "target": "readme_score_animation_rationale"
+    },
+    {
+      "relation": "builds_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_vite_build_tool",
+      "_tgt": "readme_svelte_framework",
+      "source": "readme_svelte_framework",
+      "target": "readme_vite_build_tool"
+    },
+    {
+      "relation": "precedes",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "_src": "readme_memorize_phase",
+      "_tgt": "readme_guess_phase",
+      "source": "readme_memorize_phase",
+      "target": "readme_guess_phase"
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "game_flow_components",
+      "label": "Game Phase Flow Components",
+      "nodes": [
+        "readme_colorstage_svelte",
+        "readme_sliders_svelte",
+        "readme_resultview_svelte",
+        "readme_endmodal_svelte"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "README.md"
+    },
+    {
+      "id": "hsb_color_consumers",
+      "label": "HSB Color Model Consumers",
+      "nodes": [
+        "readme_sliders_svelte",
+        "readme_colorstage_svelte",
+        "readme_colormath_utility"
+      ],
+      "relation": "share",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md"
+    },
+    {
+      "id": "design_rationale_decisions",
+      "label": "Key UX Design Decisions",
+      "nodes": [
+        "readme_dm_sans_font",
+        "readme_warm_background_rationale",
+        "readme_vertical_sliders_rationale",
+        "readme_score_animation_rationale",
+        "readme_adaptive_contrast_rationale"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md"
+    }
+  ]
+}
