@@ -117,11 +117,11 @@ export function randomTargetColor() {
   };
 }
 
-/** Random initial guess — wider / lower range so user starts "off". */
+/** Predictable initial guess — starts Hue randomly but fixes Saturation and Brightness to 50. */
 export function randomGuessColor() {
   return {
     h: randomInt(0, 359),
-    s: randomInt(15, 79),
-    b: randomInt(20, 74)
+    s: 50,
+    b: 50
   };
 }

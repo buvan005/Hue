@@ -7,8 +7,10 @@
  */
 export function scoreFromDeltaE(value) {
   if (value <= 0) return 10;
-  if (value >= 50) return 0;
-  return Number((10 * Math.exp(-0.065 * value)).toFixed(2));
+  if (value >= 70) return 0;
+  // A linear falloff is far more forgiving for human perception
+  const score = 10 * (1 - value / 70);
+  return Number(Math.max(0, score).toFixed(2));
 }
 
 // ─── Score Messages ─────────────────────────────────────────────────────────
