@@ -1,68 +1,83 @@
 <script>
   import { createEventDispatcher } from 'svelte';
-  import { fade, fly } from 'svelte/transition';
-  import { cubicOut } from 'svelte/easing';
+  import { fade, crossfade } from 'svelte/transition';
+  import { cubicInOut } from 'svelte/easing';
   import ColorStage from './ColorStage.svelte';
   import Sliders from './Sliders.svelte';
   import ResultView from './ResultView.svelte';
   import EndModal from './EndModal.svelte';
 
-  export let phase = 'memorize';
-  export let round = 1;
-  export let total = 5;
-  export let target = null;
-  export let guessHSB = { h: 180, s: 50, b: 50 };
+  export let phase         = 'memorize';
+  export let round         = 1;
+  export let total         = 5;
+  export let target        = null;
+  export let guessHSB      = { h: 180, s: 50, b: 50 };
   export let currentResult = null;
-  export let rounds = [];
-  export let totalScore = 0;
-  export let isNewBest = false;
+  export let rounds        = [];
+  export let totalScore    = 0;
+  export let bestScore     = 0;
+  export let isNewBest     = false;
 
   const dispatch = createEventDispatcher();
+
+  // Crossfade for smooth phase transitions — shared send/receive
+  const [send, receive] = crossfade({
+    duration: 400,
+    easing: cubicInOut,
+    fallback(node) {
+      return {
+        duration: 350,
+        easing: cubicInOut,
+        css: t => `opacity: ${t}; transform: scale(${0.97 + t * 0.03})`
+      };
+    }
+  });
 </script>
 
-<div class="game-content">
+<div class="gc">
   {#if phase === 'memorize' && target}
-    <div in:fade={{ duration: 180 }} out:fade={{ duration: 120 }}>
-      <ColorStage
-        {target}
-        {round}
-        {total}
-        on:done={() => dispatch('memorizeDone')}
-      />
+    <div
+      in:receive={{ key: 'phase' }}
+      out:send={{ key: 'phase' }}
+    >
+      <ColorStage {target} {round} {total} on:done={() => dispatch('memorizeDone')} />
     </div>
+
   {:else if phase === 'guess' && target}
-    <div in:fade={{ duration: 200 }} out:fade={{ duration: 120 }}>
+    <div
+      in:receive={{ key: 'phase' }}
+      out:send={{ key: 'phase' }}
+    >
       <Sliders
-        {round}
-        {total}
+        {round} {total}
         initial={guessHSB}
+        {rounds} {totalScore} {bestScore}
         on:submit
       />
     </div>
+
   {:else if phase === 'result' && currentResult}
-    <div in:fly={{ y: 12, duration: 280, easing: cubicOut }} out:fade={{ duration: 120 }}>
-      <ResultView
-        result={currentResult}
-        {round}
-        {total}
-        on:next
-      />
+    <div
+      in:receive={{ key: 'phase' }}
+      out:send={{ key: 'phase' }}
+    >
+      <ResultView result={currentResult} {round} {total} {rounds} {totalScore} on:next />
     </div>
+
   {:else if phase === 'end'}
-    <div in:fade={{ duration: 240 }}>
-      <EndModal
-        {rounds}
-        {totalScore}
-        {total}
-        {isNewBest}
-        on:playAgain
-      />
+    <div in:fade={{ duration: 500, easing: cubicInOut }}>
+      <EndModal {rounds} {totalScore} {total} {isNewBest} on:playAgain />
     </div>
   {/if}
 </div>
 
 <style>
-  .game-content {
+  .gc {
     width: 100%;
+    /* Prevent layout jumps during crossfade by using a grid stack */
+    display: grid;
+  }
+  .gc > :global(div) {
+    grid-area: 1 / 1;
   }
 </style>

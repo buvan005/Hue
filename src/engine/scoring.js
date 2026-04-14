@@ -2,19 +2,21 @@
 
 /**
  * Convert Delta E distance to a 0–10 score.
- * dE=0 → 10 (perfect), dE≥100 → 0.
- * Linear falloff with divisor 100 — forgiving for same-family colours.
+ * Forgiving linear falloff:
+ *   ΔE = 0   → 10 (perfect)
+ *   ΔE ≥ 100 → 0  (completely off)
  *
  * Reference points:
- *   ΔE  10 → 9.00  (nearly perfect)
- *   ΔE  20 → 8.00  (very close)
- *   ΔE  33 → 6.70  (same family, different brightness)
- *   ΔE  50 → 5.00  (noticeably different)
- *   ΔE  80 → 2.00  (wrong colour)
- *   ΔE 100 → 0.00  (completely off)
+ *   ΔE  5  → 9.5   (nearly identical)
+ *   ΔE 10  → 9.0   (very close)
+ *   ΔE 20  → 8.0   (close, same family)
+ *   ΔE 40  → 6.0   (decent guess)
+ *   ΔE 60  → 4.0   (noticeable difference)
+ *   ΔE 80  → 2.0   (very off)
+ *   ΔE 100 → 0.0   (completely wrong)
  */
 export function scoreFromDeltaE(value) {
-  if (value <= 0)   return 10;
+  if (value <= 0) return 10;
   if (value >= 100) return 0;
   const score = 10 * (1 - value / 100);
   return Number(Math.max(0, score).toFixed(2));

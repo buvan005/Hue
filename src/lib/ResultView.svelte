@@ -13,7 +13,6 @@
   let revealKey   = '';
   let revealTimeout;
 
-  // Delayed message reveal for dramatic effect
   $: currentRevealKey = result
     ? `${result.target.hex}-${result.guess.hex}-${result.score}`
     : '';
@@ -29,75 +28,82 @@
   $: roundsLeft = total - round;
 </script>
 
-<!-- ── Two-card grid: Guess | Target ── -->
-<div class="result-grid">
-  <!-- Guess card -->
-  <div class="color-card">
-    <div class="color-swatch" style="background-color: {result?.guess.hex ?? '#aaa'};"></div>
-    <div class="color-meta">
-      <div class="color-meta-label">GUESS</div>
-      <div class="color-meta-vals">H{result?.guess.h} · S{result?.guess.s} · B{result?.guess.b}</div>
+<div class="result-screen">
+
+  <!-- Two-card comparison -->
+  <div class="result-grid">
+    <div class="color-card">
+      <div class="color-swatch" style="background-color: {result?.guess.hex ?? '#aaa'};"></div>
+      <div class="color-meta">
+        <div class="color-meta-label">GUESS</div>
+        <div class="color-meta-vals">H{result?.guess.h} · S{result?.guess.s} · B{result?.guess.b}</div>
+      </div>
+    </div>
+
+    <div class="color-card">
+      <div class="color-swatch" style="background-color: {result?.target.hex ?? '#888'}; position: relative;">
+        <span class="de-badge">ΔE {result?.dE}</span>
+      </div>
+      <div class="color-meta">
+        <div class="color-meta-label">TARGET</div>
+        <div class="color-meta-vals">H{result?.target.h} · S{result?.target.s} · B{result?.target.b}</div>
+      </div>
     </div>
   </div>
 
-  <!-- Target card -->
-  <div class="color-card">
-    <div class="color-swatch" style="background-color: {result?.target.hex ?? '#888'}; position: relative;">
-      <span class="de-badge">ΔE {result?.dE}</span>
-    </div>
-    <div class="color-meta">
-      <div class="color-meta-label">TARGET</div>
-      <div class="color-meta-vals">H{result?.target.h} · S{result?.target.s} · B{result?.target.b}</div>
-    </div>
+  <hr class="result-divider" />
+
+  <!-- Score -->
+  <div class="score-row">
+    <span class="score-label">SCORE</span>
+    {#if result}
+      <ScoreDisplay
+        value={result.score}
+        decimals={2}
+        duration={900}
+        delay={200}
+        color="#1a1a1a"
+        size="38px"
+      />
+    {/if}
+    <span class="score-denom">/ 10</span>
   </div>
-</div>
 
-<hr class="result-divider" />
-
-<!-- ── Score ── -->
-<div class="score-row">
-  <span class="score-label">SCORE</span>
-  {#if result}
-    <ScoreDisplay
-      value={result.score}
-      decimals={2}
-      duration={900}
-      delay={200}
-      color="#1a1a1a"
-      size="38px"
-    />
+  <!-- Feedback -->
+  {#if msgVisible && result?.msg}
+    <div in:fade={{ duration: 320 }} class="feedback-quote">
+      "{result.msg}"
+    </div>
   {/if}
-  <span class="score-denom">/ 10</span>
-</div>
 
-<!-- ── Feedback quote ── -->
-{#if msgVisible && result?.msg}
-  <div in:fade={{ duration: 320 }} class="feedback-quote">
-    "{result.msg}"
+  <hr class="result-divider" />
+
+  <!-- Footer -->
+  <div class="result-footer">
+    <span class="result-meta">
+      ΔE {result?.dE} ·
+      {roundsLeft > 0
+        ? `${roundsLeft} round${roundsLeft !== 1 ? 's' : ''} left`
+        : 'final round'}
+    </span>
+    <button
+      class="next-btn"
+      on:click={() => dispatch('next')}
+      aria-label={round >= total ? 'See results' : 'Next round'}
+    >
+      {round >= total ? 'RESULTS →' : 'NEXT →'}
+    </button>
   </div>
-{/if}
 
-<hr class="result-divider" />
-
-<!-- ── Footer: meta + Next button ── -->
-<div class="result-footer">
-  <span class="result-meta">
-    ΔE {result?.dE} ·
-    {roundsLeft > 0
-      ? `${roundsLeft} round${roundsLeft !== 1 ? 's' : ''} left`
-      : 'final round'}
-  </span>
-  <button
-    class="next-btn"
-    on:click={() => dispatch('next')}
-    aria-label={round >= total ? 'See results' : 'Next round'}
-  >
-    {round >= total ? 'RESULTS →' : 'NEXT →'}
-  </button>
 </div>
 
 <style>
-  /* ── Two-card grid ── */
+  .result-screen {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 24px 20px;
+  }
+
   .result-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -112,11 +118,10 @@
   }
 
   .color-swatch {
-    height: 110px;
+    height: 120px;
     transition: background-color 0.08s ease;
   }
 
-  /* ΔE badge on target swatch */
   .de-badge {
     position: absolute;
     top: 8px;
@@ -131,7 +136,6 @@
     user-select: none;
   }
 
-  /* Card meta section */
   .color-meta {
     padding: 8px 10px;
     background: #F2EFE7;
@@ -153,14 +157,12 @@
     font-family: 'JetBrains Mono', monospace;
   }
 
-  /* ── Divider ── */
   .result-divider {
     border: none;
     border-top: 1px dashed #c8c3b8;
     margin: 12px 0;
   }
 
-  /* ── Score row ── */
   .score-row {
     display: flex;
     align-items: baseline;
@@ -182,7 +184,6 @@
     font-family: 'JetBrains Mono', monospace;
   }
 
-  /* ── Feedback blockquote ── */
   .feedback-quote {
     border-left: 3px solid #1a1a1a;
     padding-left: 10px;
@@ -194,7 +195,6 @@
     line-height: 1.5;
   }
 
-  /* ── Result footer ── */
   .result-footer {
     display: flex;
     justify-content: space-between;
@@ -211,10 +211,10 @@
     background: #1a1a1a;
     color: #F2EFE7;
     border: none;
-    padding: 6px 14px;
+    padding: 8px 18px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    border-radius: 3px;
+    border-radius: 4px;
     cursor: pointer;
     letter-spacing: 0.08em;
     transition: opacity 0.15s, transform 0.15s;

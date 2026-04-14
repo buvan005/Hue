@@ -4,38 +4,33 @@
   import { hsbToRgb, hsbHex, luma } from '../engine/color.js';
 
   export let target = null;
-  export let round = 1;
-  export let total = 5;
+  export let round  = 1;
+  export let total  = 5;
 
   const dispatch = createEventDispatcher();
-
-  const MEM_MS = 2400;
-  const GO_AT  = 1500;
+  const MEM_MS = 5000;  // 5 seconds to memorize
+  const GO_AT  = 3500;
 
   let showGo    = false;
   let countdown = Math.ceil(MEM_MS / 1000);
   let hex       = '';
   let progress  = 1;
   let runId     = '';
-
-  let goTimeout;
-  let doneTimeout;
-  let intervalId;
-  let animationFrameId;
+  let isDark    = true;
+  let goTimeout, doneTimeout, intervalId, animationFrameId;
 
   function clearTimers() {
-    clearTimeout(goTimeout);
-    clearTimeout(doneTimeout);
-    clearInterval(intervalId);
-    cancelAnimationFrame(animationFrameId);
+    clearTimeout(goTimeout); clearTimeout(doneTimeout);
+    clearInterval(intervalId); cancelAnimationFrame(animationFrameId);
   }
 
   function startSequence() {
     if (!target) return;
     clearTimers();
-
-    hex      = hsbHex(target.h, target.s, target.b);
-    showGo   = false;
+    hex       = hsbHex(target.h, target.s, target.b);
+    const rgb = hsbToRgb(target.h, target.s, target.b);
+    isDark    = luma(rgb.r, rgb.g, rgb.b) < 145;
+    showGo    = false;
     countdown = Math.ceil(MEM_MS / 1000);
     progress  = 1;
 
@@ -47,134 +42,163 @@
     };
     animationFrameId = requestAnimationFrame(tick);
 
-    intervalId = setInterval(() => {
-      const elapsed = performance.now() - startedAt;
-      countdown = Math.max(0, Math.ceil((MEM_MS - elapsed) / 1000));
+    intervalId  = setInterval(() => {
+      countdown = Math.max(0, Math.ceil((MEM_MS - (performance.now() - startedAt)) / 1000));
     }, 100);
-
     goTimeout   = setTimeout(() => { showGo = true; }, GO_AT);
     doneTimeout = setTimeout(() => { clearTimers(); dispatch('done'); }, MEM_MS);
   }
 
   $: currentRunId = target ? `${target.h}-${target.s}-${target.b}-${round}` : '';
-  $: if (currentRunId && currentRunId !== runId) {
-    runId = currentRunId;
-    startSequence();
-  }
+  $: if (currentRunId && currentRunId !== runId) { runId = currentRunId; startSequence(); }
 
   onDestroy(() => clearTimers());
+
+  $: overlayColor = isDark ? 'rgba(255,255,255,' : 'rgba(0,0,0,';
 </script>
 
-<!-- Color swatch -->
-<div class="mem-swatch" style="background-color: {hex};">
-  <!-- Large decorative countdown (bottom-right) -->
-  <div class="mem-counter" aria-hidden="true">{countdown}</div>
+<div class="memorize-screen">
+  <!-- Color swatch — full centered display -->
+  <div class="mem-swatch" style="background-color: {hex};">
+    <!-- Round pips on top -->
+    <div class="round-bar">
+      {#each Array(total) as _, i}
+        <div class="round-pip"
+          class:active={i === round - 1}
+          class:done={i < round - 1}
+          style="background: {i === round - 1
+            ? (isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)')
+            : i < round - 1
+              ? (isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.25)')
+              : (isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)')
+          };"
+        ></div>
+      {/each}
+    </div>
 
-  <!-- Large decorative GO (bottom-left, fades in at GO_AT) -->
-  {#if showGo}
-    <div in:fade={{ duration: 300 }} class="mem-go" aria-hidden="true">GO</div>
-  {/if}
+    <!-- Center content -->
+    <div class="mem-center">
+      <div class="mem-countdown"
+        style="color: {overlayColor}0.12);"
+      >{countdown}</div>
+      {#if showGo}
+        <div in:fade={{ duration: 300 }} class="mem-go-label"
+          style="color: {overlayColor}0.35);"
+        >REMEMBER THIS</div>
+      {/if}
+    </div>
 
-  <!-- HSB pill (center bottom) -->
-  <span class="mem-hsb">H{target?.h} · S{target?.s} · B{target?.b}</span>
+    <!-- Bottom info -->
+    <div class="mem-bottom">
+      <span class="mem-label"
+        style="color: {overlayColor}0.45);">MEMORIZE</span>
+      <span class="mem-round"
+        style="color: {overlayColor}0.35);">{round} / {total}</span>
+    </div>
+  </div>
 
-  <!-- Bottom meta row -->
-  <div class="mem-meta">
-    <span class="mem-round">{round} / {total}</span>
-    <span class="mem-phase">MEMORIZE</span>
+  <!-- Progress bar -->
+  <div class="progress-wrap">
+    <div class="progress-fill" style="width:{progress * 100}%;"></div>
   </div>
 </div>
 
-<!-- Slim progress bar below swatch -->
-<div class="progress-bar-wrap">
-  <div class="progress-bar-fill" style="width: {progress * 100}%;"></div>
-</div>
-
 <style>
-  /* ── Swatch ── */
-  .mem-swatch {
-    border-radius: 6px;
-    height: 220px;
-    position: relative;
-    overflow: hidden;
+  .memorize-screen {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    padding: 14px;
-    transition: background-color 0.08s ease;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    min-height: 480px;
   }
 
-  /* ── Large decorative numbers ── */
-  .mem-counter,
-  .mem-go {
+  .mem-swatch {
+    width: 100%;
+    max-width: 680px;
+    min-height: 380px;
+    border-radius: 8px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid rgba(0,0,0,0.06);
+    transition: background-color 0.15s ease;
+    overflow: hidden;
+  }
+
+  .round-bar {
     position: absolute;
-    bottom: 10px;
-    font-size: clamp(56px, 16vw, 80px);
+    top: 14px;
+    left: 16px;
+    right: 16px;
+    display: flex;
+    gap: 6px;
+  }
+
+  .round-pip {
+    height: 3px;
+    flex: 1;
+    border-radius: 2px;
+    transition: background 0.3s;
+  }
+
+  .mem-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mem-countdown {
+    font-size: clamp(80px, 16vw, 140px);
     font-weight: 700;
     line-height: 1;
-    pointer-events: none;
-    user-select: none;
     font-family: 'JetBrains Mono', monospace;
+    letter-spacing: -0.05em;
+    user-select: none;
   }
 
-  .mem-counter {
-    right: 14px;
-    color: rgba(255, 255, 255, 0.20);
+  .mem-go-label {
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
   }
 
-  .mem-go {
-    left: 14px;
-    color: rgba(255, 255, 255, 0.25);
-  }
-
-  /* ── Center HSB pill ── */
-  .mem-hsb {
+  .mem-bottom {
     position: absolute;
     bottom: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 9px;
-    letter-spacing: 0.10em;
-    color: rgba(255, 255, 255, 0.55);
-    background: rgba(0, 0, 0, 0.18);
-    padding: 3px 8px;
-    border-radius: 3px;
-    white-space: nowrap;
-    font-family: 'JetBrains Mono', monospace;
-    z-index: 3;
-  }
-
-  /* ── Bottom meta row ── */
-  .mem-meta {
+    left: 16px;
+    right: 16px;
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
-    position: relative;
-    z-index: 2;
+    align-items: center;
+  }
+
+  .mem-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    font-family: 'JetBrains Mono', monospace;
   }
 
   .mem-round {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.70);
+    font-size: 10px;
+    letter-spacing: 0.08em;
     font-family: 'JetBrains Mono', monospace;
   }
 
-  .mem-phase {
-    font-size: 9px;
-    letter-spacing: 0.18em;
-    color: rgba(255, 255, 255, 0.55);
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  /* ── Progress bar ── */
-  .progress-bar-wrap {
+  .progress-wrap {
+    width: 100%;
+    max-width: 680px;
     height: 3px;
-    background: #ddd;
-    margin-top: 10px;
+    background: #C8C3B4;
     overflow: hidden;
+    margin-top: 0;
   }
 
-  .progress-bar-fill {
+  .progress-fill {
     height: 3px;
     background: #1a1a1a;
     transition: width 0.1s linear;
