@@ -16,53 +16,184 @@
     isNewBest: false
   };
 
+  const phaseLabels = {
+    memorize: 'PHASE 1 / MEMORIZE',
+    guess:    'PHASE 2 / GUESS',
+    result:   'PHASE 3 / RESULT',
+    end:      'PHASE 4 / END'
+  };
+
+  const chromeTitles = {
+    memorize: 'HUE v1.0 — memorize.view',
+    guess:    'HUE v1.0 — guess.view',
+    result:   'HUE v1.0 — result.view',
+    end:      'HUE v1.0 — end.view'
+  };
+
   onMount(() => {
     const unsubscribe = gameStore.subscribe((value) => {
       state = value;
     });
-
     gameStore.init();
     return unsubscribe;
   });
 </script>
 
-<div class="min-h-screen bg-[#f0efed] flex flex-col items-center px-4 py-0 font-['DM_Sans',_sans-serif]">
-  <header class="w-full max-w-[520px] flex items-center justify-between pt-6 pb-3">
-    <div class="text-[19px] font-extrabold tracking-[-0.06em] text-[#111] uppercase">HUE</div>
-    <div class="text-[10.5px] text-[#bbb] font-normal tracking-[0.02em]">
-      Best: <span class="text-[#999] font-semibold tabular-nums">{state.bestScore > 0 ? state.bestScore.toFixed(2) : '—'}</span>
-    </div>
-  </header>
+<div class="hue-root">
+  <!-- macOS-style window chrome -->
+  <div class="window-chrome">
+    <div class="dot dot-r"></div>
+    <div class="dot dot-y"></div>
+    <div class="dot dot-g"></div>
+    <span class="chrome-title">{chromeTitles[state.phase] ?? 'HUE v1.0'}</span>
+  </div>
 
-  <GameCard
-    phase={state.phase}
-    round={state.round}
-    total={state.total}
-    target={state.target}
-    guessHSB={state.guessHSB}
-    currentResult={state.currentResult}
-    rounds={state.rounds}
-    totalScore={state.totalScore}
-    isNewBest={state.isNewBest}
-    on:memorizeDone={() => gameStore.finishMemorize()}
-    on:submit={(event) => gameStore.submitGuess(event.detail)}
-    on:next={() => gameStore.nextRound()}
-    on:playAgain={() => gameStore.restart()}
-  />
+  <!-- Main game panel -->
+  <div class="game-panel">
+    <!-- Topbar -->
+    <div class="topbar">
+      <span class="topbar-label">HUE</span>
+      <span class="topbar-best">Best: {state.bestScore > 0 ? state.bestScore.toFixed(2) : '—'}</span>
+    </div>
 
-  <footer class="w-full max-w-[520px] flex items-center justify-between pt-3 pb-5 text-[10px] text-[#c5c5c5]">
-    <div class="flex gap-3 items-center">
-      <span class="tracking-[0.04em]">HUE v1.0</span>
-      <span class="text-[#ddd]">·</span>
-      <span class="tracking-[0.02em]">Color Memory Game</span>
+    <hr class="divider" />
+    <div class="phase-tag">{phaseLabels[state.phase] ?? ''}</div>
+
+    <!-- Game content -->
+    <GameCard
+      phase={state.phase}
+      round={state.round}
+      total={state.total}
+      target={state.target}
+      guessHSB={state.guessHSB}
+      currentResult={state.currentResult}
+      rounds={state.rounds}
+      totalScore={state.totalScore}
+      isNewBest={state.isNewBest}
+      on:memorizeDone={() => gameStore.finishMemorize()}
+      on:submit={(e) => gameStore.submitGuess(e.detail)}
+      on:next={() => gameStore.nextRound()}
+      on:playAgain={() => gameStore.restart()}
+    />
+
+    <hr class="divider" />
+
+    <!-- Footer -->
+    <div class="footer-bar">
+      <span>HUE v1.0 · Color Memory Game</span>
+      <span class="footer-icon" aria-label="Sound">♪</span>
     </div>
-    <div class="flex gap-1 items-center">
-      <button class="w-7 h-7 flex items-center justify-center text-[#c5c5c5] hover:text-[#888] transition-colors rounded-full hover:bg-black/[0.04]" aria-label="Sound">
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-        </svg>
-      </button>
-    </div>
-  </footer>
+  </div>
 </div>
+
+<style>
+  .hue-root {
+    font-family: 'JetBrains Mono', monospace;
+    background: #F2EFE7;
+    color: #1a1a1a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+
+  /* ── Chrome bar ── */
+  .window-chrome,
+  .game-panel {
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .window-chrome {
+    background: #2b2b2b;
+    border-radius: 8px 8px 0 0;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-r { background: #FF5F57; }
+  .dot-y { background: #FFBD2E; }
+  .dot-g { background: #28C840; }
+
+  .chrome-title {
+    color: #aaa;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    margin-left: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Game panel ── */
+  .game-panel {
+    background: #F2EFE7;
+    border: 1px solid #c8c3b8;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 20px;
+  }
+
+  /* ── Topbar ── */
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .topbar-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: #888;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .topbar-best {
+    font-size: 11px;
+    color: #888;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Dashed divider ── */
+  .divider {
+    border: none;
+    border-top: 1px dashed #c8c3b8;
+    margin: 14px 0;
+  }
+
+  /* ── Phase tag ── */
+  .phase-tag {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: #aaa;
+    margin-bottom: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── Footer ── */
+  .footer-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: #aaa;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .footer-icon {
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .footer-icon:hover {
+    color: #555;
+  }
+</style>

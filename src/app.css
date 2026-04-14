@@ -8,9 +8,9 @@
 
 html, body {
   height: 100%;
-  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-  background: #f0efed;
-  color: #111;
+  font-family: 'JetBrains Mono', monospace;
+  background: #F2EFE7;
+  color: #1a1a1a;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

@@ -5,10 +5,10 @@
   import ScoreDisplay from './ScoreDisplay.svelte';
   import { endTagline, rankLabel } from '../engine/scoring.js';
 
-  export let rounds = [];
-  export let totalScore = 0;
-  export let total = 5;
-  export let isNewBest = false;
+  export let rounds      = [];
+  export let totalScore  = 0;
+  export let total       = 5;
+  export let isNewBest   = false;
 
   const dispatch = createEventDispatcher();
 
@@ -17,16 +17,12 @@
 
   onMount(() => {
     rank = rankLabel(totalScore, total * 10);
-    const timeoutId = setTimeout(() => {
-      stripVisible = true;
-    }, 600);
-
-    return () => clearTimeout(timeoutId);
+    const t = setTimeout(() => { stripVisible = true; }, 600);
+    return () => clearTimeout(t);
   });
 
   function handleShare() {
     const text = `I scored ${totalScore.toFixed(2)}/${total * 10} on HUE. Can you beat me?`;
-
     if (navigator.share) {
       navigator.share({ title: 'HUE', text }).catch(() => {});
     } else if (navigator.clipboard) {
@@ -35,91 +31,226 @@
   }
 </script>
 
-<div class="bg-[#0d0d0d] text-white rounded-[24px] overflow-hidden">
-  <div class="p-7 flex flex-col" style="min-height: 380px;">
-    <div class="flex items-center justify-between mb-2">
-      <span class="text-[11px] font-semibold text-[#e8b84b] tracking-[-0.01em]">{rank}</span>
-      {#if isNewBest}
-        <span
-          in:fade={{ duration: 400 }}
-          class="text-[10px] font-semibold tracking-[0.08em] uppercase text-[#e8b84b] px-2.5 py-1 rounded-full bg-[#e8b84b]/10"
-        >
-          * New best
-        </span>
-      {/if}
-    </div>
+<!-- Dark end panel -->
+<div class="end-panel">
 
-    <div class="flex items-baseline gap-2 mb-1">
-      <ScoreDisplay
-        value={totalScore}
-        decimals={2}
-        duration={1200}
-        delay={100}
-        color="#fff"
-        size="clamp(58px, 16vw, 84px)"
-      />
-      <span class="text-[28px] font-black tracking-[-0.04em] text-[#2a2a2a]">/{total * 10}</span>
-    </div>
-
-    <p class="text-[12.5px] text-[#4a4a4a] font-normal mb-6 leading-snug">
-      {endTagline(totalScore / total)}
-    </p>
-
-    {#if stripVisible}
-      <div
-        in:fly={{ y: 10, duration: 350, easing: cubicOut }}
-        class="flex gap-1.5 mb-6"
-        style="height: 72px;"
-      >
-        {#each rounds as result, index}
-          <div
-            class="flex-1 rounded-xl overflow-hidden relative"
-            in:fly={{ y: 8, duration: 300, delay: index * 60, easing: cubicOut }}
-          >
-            <div class="absolute inset-0" style="background: {result.guess.hex};"></div>
-            <div
-              class="absolute inset-0"
-              style="background: {result.target.hex}; clip-path: polygon(0 100%, 100% 0, 100% 100%);"
-            ></div>
-            <div
-              class="absolute top-1.5 left-2 text-[10.5px] font-bold leading-none"
-              style="color: rgba(255,255,255,0.85); text-shadow: 0 1px 4px rgba(0,0,0,0.4);"
-            >
-              {result.score.toFixed(1)}
-            </div>
-          </div>
-        {/each}
-      </div>
-    {:else}
-      <div class="flex gap-1.5 mb-6" style="height: 72px;">
-        {#each Array(total) as _}
-          <div class="flex-1 rounded-xl bg-white/5 animate-pulse"></div>
-        {/each}
-      </div>
+  <!-- ── Top bar: rank + new best ── -->
+  <div class="end-topbar">
+    <span class="end-rank">{rank}</span>
+    {#if isNewBest}
+      <span in:fade={{ duration: 400 }} class="end-best">★ NEW BEST</span>
     {/if}
+  </div>
 
-    <div class="flex gap-2 mt-auto">
-      <button
-        on:click={() => dispatch('playAgain')}
-        class="px-5 py-3 rounded-full border border-white/15 bg-transparent text-white/80 text-[12.5px] font-medium cursor-pointer transition-all duration-150 hover:border-white/30 hover:bg-white/5 hover:scale-[1.02] active:scale-[0.97] whitespace-nowrap"
-      >
-        Play Again
-      </button>
-      <button
-        on:click={handleShare}
-        class="flex-1 py-3 rounded-full bg-white text-[#111] text-[12.5px] font-semibold cursor-pointer transition-all duration-150 hover:opacity-90 hover:scale-[1.02] active:scale-[0.97] active:opacity-80"
-      >
-        Challenge a friend ->
-      </button>
-    </div>
+  <!-- ── Total score ── -->
+  <div class="end-score-row">
+    <ScoreDisplay
+      value={totalScore}
+      decimals={2}
+      duration={1200}
+      delay={100}
+      color="#fff"
+      size="clamp(52px, 14vw, 72px)"
+    />
+    <span class="end-denom">/{total * 10}</span>
+  </div>
 
-    <button
-      on:click={() => dispatch('playAgain')}
-      class="mt-2.5 py-3 rounded-full border border-white/[0.07] bg-transparent text-white/25 text-[11px] font-normal cursor-pointer transition-all duration-150 hover:text-white/50 hover:border-white/18 w-full tracking-[0.02em]"
+  <!-- ── Tagline ── -->
+  <p class="end-tagline">{endTagline(totalScore / total)}</p>
+
+  <!-- ── Round chips ── -->
+  {#if stripVisible}
+    <div
+      class="chips-row"
+      in:fly={{ y: 10, duration: 350, easing: cubicOut }}
     >
+      {#each rounds as r, i}
+        <div
+          class="chip"
+          in:fly={{ y: 8, duration: 300, delay: i * 60, easing: cubicOut }}
+        >
+          <!-- Top half: guess color -->
+          <div class="chip-half" style="background-color: {r.guess.hex};"></div>
+          <!-- Bottom half: target color -->
+          <div class="chip-half" style="background-color: {r.target.hex};"></div>
+          <!-- Score badge -->
+          <span class="chip-score">{r.score.toFixed(1)}</span>
+        </div>
+      {/each}
+    </div>
+  {:else}
+    <!-- Skeleton while loading -->
+    <div class="chips-row">
+      {#each Array(total) as _}
+        <div class="chip chip-skeleton"></div>
+      {/each}
+    </div>
+  {/if}
+
+  <!-- ── Actions ── -->
+  <div class="end-actions">
+    <button class="btn-primary" on:click={() => dispatch('playAgain')}>
+      PLAY AGAIN
+    </button>
+    <button class="btn-secondary" on:click={handleShare}>
+      CHALLENGE A FRIEND →
+    </button>
+    <button class="btn-ghost" on:click={() => dispatch('playAgain')}>
       Daily Challenge
     </button>
   </div>
+
 </div>
 
+<style>
+  /* ── Dark container ── */
+  .end-panel {
+    background: #1a1a1a;
+    border-radius: 6px;
+    padding: 20px;
+  }
 
+  /* ── Top bar ── */
+  .end-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .end-rank {
+    font-size: 10px;
+    color: #FFBD2E;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.06em;
+  }
+
+  .end-best {
+    font-size: 10px;
+    color: #FFBD2E;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── Score ── */
+  .end-score-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+
+  .end-denom {
+    font-size: 24px;
+    color: #555;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+  }
+
+  /* ── Tagline ── */
+  .end-tagline {
+    font-size: 12px;
+    color: #888;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 6px 0 18px;
+    line-height: 1.5;
+  }
+
+  /* ── Chips row ── */
+  .chips-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .chip {
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    height: 64px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .chip-half {
+    flex: 1;
+  }
+
+  .chip-score {
+    position: absolute;
+    top: 5px;
+    left: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(0, 0, 0, 0.38);
+    padding: 1px 5px;
+    border-radius: 2px;
+    letter-spacing: 0.02em;
+    user-select: none;
+  }
+
+  /* Skeleton chip */
+  .chip-skeleton {
+    background: rgba(255, 255, 255, 0.06);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50%       { opacity: 0.8; }
+  }
+
+  /* ── Action buttons ── */
+  .end-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: #fff;
+    color: #1a1a1a;
+    border: none;
+    padding: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.12s;
+  }
+  .btn-primary:hover  { opacity: 0.88; }
+  .btn-primary:active { transform: scale(0.97); }
+
+  .btn-secondary {
+    background: transparent;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.12s;
+  }
+  .btn-secondary:hover  { border-color: #888; }
+  .btn-secondary:active { transform: scale(0.97); }
+
+  .btn-ghost {
+    background: transparent;
+    color: #555;
+    border: none;
+    padding: 9px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .btn-ghost:hover { color: #aaa; }
+</style>

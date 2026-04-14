@@ -2,8 +2,8 @@
   import { createEventDispatcher } from 'svelte';
   import { hsbToRgb, hsbHex, luma } from '../engine/color.js';
 
-  export let round = 1;
-  export let total = 5;
+  export let round   = 1;
+  export let total   = 5;
   export let initial = { h: 180, s: 50, b: 50 };
 
   const dispatch = createEventDispatcher();
@@ -13,7 +13,7 @@
   let b = initial.b;
   let appliedInitialKey = '';
 
-  // Reset sliders when a new round starts
+  // Reset sliders whenever a new round starts
   $: initialKey = initial ? `${initial.h}-${initial.s}-${initial.b}-${round}` : '';
   $: if (initialKey && initialKey !== appliedInitialKey) {
     appliedInitialKey = initialKey;
@@ -22,19 +22,15 @@
     b = initial.b;
   }
 
-  // Derived color values
-  $: previewHex = hsbHex(h, s, b);
-  $: previewRgb = hsbToRgb(h, s, b);
+  // Live preview
+  $: previewHex  = hsbHex(h, s, b);
+  $: previewRgb  = hsbToRgb(h, s, b);
   $: previewLuma = luma(previewRgb.r, previewRgb.g, previewRgb.b);
-  $: isDark = previewLuma < 145;
+  $: isDark      = previewLuma < 145;
 
-  // ─── GRADIENT BACKGROUNDS ─────────────────────────────────────────────
-  // CRITICAL: All gradients use "to top" because rotate(-90deg) maps
-  // min→bottom, max→top. Gradient must go in the SAME direction:
-  //   bottom = low value (start of gradient)
-  //   top    = high value (end of gradient)
-
-  // Hue: full rainbow — bottom=0° (red), top=360° (red)
+  // ── Gradient tracks (to top = min at bottom, max at top) ──────────────────
+  // Matches the rotated range input: min(left) → physical bottom after -90deg rotation
+  //                                  max(right) → physical top  after -90deg rotation
   $: hueGrad = `linear-gradient(to top,
     hsl(0,100%,50%), hsl(30,100%,50%), hsl(60,100%,50%),
     hsl(90,100%,50%), hsl(120,100%,50%), hsl(150,100%,50%),
@@ -42,69 +38,97 @@
     hsl(270,100%,50%), hsl(300,100%,50%), hsl(330,100%,50%),
     hsl(360,100%,50%))`;
 
-  // Saturation: bottom=0 (desaturated/gray), top=100 (fully saturated)
-  $: satColorFull = (() => { const c = hsbToRgb(h, 100, b); return `rgb(${c.r},${c.g},${c.b})`; })();
-  $: satColorNone = (() => { const c = hsbToRgb(h, 0, b);   return `rgb(${c.r},${c.g},${c.b})`; })();
-  $: satGrad = `linear-gradient(to top, ${satColorNone}, ${satColorFull})`;
+  $: satFull = (() => { const c = hsbToRgb(h, 100, b); return `rgb(${c.r},${c.g},${c.b})`; })();
+  $: satNone = (() => { const c = hsbToRgb(h,   0, b); return `rgb(${c.r},${c.g},${c.b})`; })();
+  $: satGrad = `linear-gradient(to top, ${satNone}, ${satFull})`;
 
-  // Brightness: bottom=0 (black), top=100 (full brightness)
-  $: briColorFull = (() => { const c = hsbToRgb(h, s, 100); return `rgb(${c.r},${c.g},${c.b})`; })();
-  $: briGrad = `linear-gradient(to top, #000000, ${briColorFull})`;
+  $: briFull = (() => { const c = hsbToRgb(h, s, 100); return `rgb(${c.r},${c.g},${c.b})`; })();
+  $: briGrad = `linear-gradient(to top, #000000, ${briFull})`;
 
   function handleSubmit() {
     dispatch('submit', { h, s, b });
   }
 </script>
 
-<div class="guess-root">
-  <!-- 3 Slider Columns -->
-  <div class="sliders-rail">
-    <!-- HUE -->
-    <div class="slider-col">
-      <div class="col-grad" style="background: {hueGrad};"></div>
-      <span class="col-label">H</span>
-      <input type="range" min="0" max="360" step="1" bind:value={h} aria-label="Hue" />
+<div class="guess-layout">
+  <!-- ── Left: Slider Panel ── -->
+  <div class="slider-panel">
+
+    <!-- HUE row -->
+    <div class="slider-row">
+      <span class="slider-label">H · HUE</span>
+      <div class="slider-track" style="background: {hueGrad};" aria-label="Hue slider track">
+        <input
+          id="hue-slider"
+          type="range" min="0" max="360" step="1"
+          bind:value={h}
+          aria-label="Hue"
+        />
+      </div>
+      <span class="slider-val">{h}</span>
     </div>
 
-    <!-- SATURATION -->
-    <div class="slider-col">
-      <div class="col-grad" style="background: {satGrad};"></div>
-      <span class="col-label">S</span>
-      <input type="range" min="0" max="100" step="1" bind:value={s} aria-label="Saturation" />
+    <!-- SATURATION row -->
+    <div class="slider-row">
+      <span class="slider-label">S · SAT</span>
+      <div class="slider-track" style="background: {satGrad};" aria-label="Saturation slider track">
+        <input
+          id="sat-slider"
+          type="range" min="0" max="100" step="1"
+          bind:value={s}
+          aria-label="Saturation"
+        />
+      </div>
+      <span class="slider-val">{s}</span>
     </div>
 
-    <!-- BRIGHTNESS -->
-    <div class="slider-col">
-      <div class="col-grad" style="background: {briGrad};"></div>
-      <span class="col-label">B</span>
-      <input type="range" min="0" max="100" step="1" bind:value={b} aria-label="Brightness" />
+    <!-- BRIGHTNESS row -->
+    <div class="slider-row">
+      <span class="slider-label">B · BRI</span>
+      <div class="slider-track" style="background: {briGrad};" aria-label="Brightness slider track">
+        <input
+          id="bri-slider"
+          type="range" min="0" max="100" step="1"
+          bind:value={b}
+          aria-label="Brightness"
+        />
+      </div>
+      <span class="slider-val">{b}</span>
     </div>
+
   </div>
 
-  <!-- Preview + Submit -->
-  <div class="preview-panel">
+  <!-- ── Right: Preview Pane ── -->
+  <div class="preview-pane">
+    <!-- Live color preview fill -->
     <div class="preview-fill" style="background-color: {previewHex};">
-      <div class="preview-round" style="color: {isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.25)'};">
+      <span
+        class="guess-round"
+        style="color: {isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.30)'};"
+      >
         {round} / {total}
-      </div>
-      <div class="preview-phase" style="color: {isDark ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.18)'};">
-        guess
-      </div>
+      </span>
 
+      <!-- Submit button -->
       <button
         on:click={handleSubmit}
+        class="submit-btn"
         aria-label="Submit guess"
-        class="btn-submit"
-        style="background: {isDark ? 'rgba(255,255,255,0.94)' : 'rgba(0,0,0,0.84)'};"
+        style="background: {isDark ? 'rgba(255,255,255,0.94)' : '#1a1a1a'};"
       >
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none"
-          stroke={isDark ? '#111' : '#fff'}
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12" />
+        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" width="14" height="14">
+          <path
+            d="M3 8l4 4 6-6"
+            stroke={isDark ? '#111' : '#fff'}
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </button>
     </div>
 
+    <!-- Info strip -->
     <div class="info-strip">
       <span class="strip-hsb">H{h} · S{s} · B{b}</span>
       <span class="strip-hex">{previewHex.toUpperCase()}</span>
@@ -113,187 +137,177 @@
 </div>
 
 <style>
-  .guess-root {
-    display: flex;
-    height: 400px;
-    width: 100%;
-  }
-
-  /* ── Slider Rail (contains all 3 columns) ── */
-  .sliders-rail {
-    display: flex;
-    flex-shrink: 0;
-  }
-
-  /* ── Individual Slider Column ── */
-  .slider-col {
-    width: 52px;
-    position: relative;
+  /* ── Layout ── */
+  .guess-layout {
+    display: grid;
+    grid-template-columns: 152px 1fr;
+    border: 1px solid #c8c3b8;
+    border-radius: 6px;
     overflow: hidden;
   }
 
-  .slider-col + .slider-col {
-    border-left: 1px solid rgba(255, 255, 255, 0.12);
+  /* ── Slider Panel (left column) ── */
+  .slider-panel {
+    background: #E9E5DC;
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-right: 1px solid #c8c3b8;
   }
 
-  .col-grad {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
+  .slider-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
-  .col-label {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
+  .slider-label {
     font-size: 9px;
-    font-weight: 700;
     letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.7);
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-    z-index: 15;
-    pointer-events: none;
+    color: #888;
+    font-family: 'JetBrains Mono', monospace;
     user-select: none;
   }
 
+  /* ── Slider Track ── */
   /*
-   * Range input rotated -90deg:
-   *   min(0)   → physical BOTTOM
-   *   max(360) → physical TOP
-   * Gradients use "to top" so they match this direction.
+   * The track div is the visible gradient strip (height: 80px, full panel width).
+   * The range input is rotated -90deg so its drag axis becomes vertical:
+   *   input width  = track height (80px)  → becomes visual vertical span
+   *   input height = track width  (132px) → becomes visual horizontal span
    */
-  .slider-col input[type='range'] {
+  .slider-track {
+    position: relative;
+    height: 80px;
+    border-radius: 3px;
+    overflow: hidden;
+    cursor: ns-resize;
+  }
+
+  .slider-track input[type='range'] {
     -webkit-appearance: none;
     appearance: none;
-    width: 400px;
-    height: 52px;
+    /* Before rotation: width = drag length, height = thumb hit-area width */
+    width: 80px;
+    height: 132px;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(-90deg);
     background: transparent;
-    cursor: ns-resize;
     outline: none;
-    z-index: 10;
+    cursor: ns-resize;
     touch-action: none;
     margin: 0;
     padding: 0;
+    z-index: 10;
   }
 
-  .slider-col input[type='range']::-webkit-slider-runnable-track {
+  /* Transparent track (gradient is on the parent div) */
+  .slider-track input[type='range']::-webkit-slider-runnable-track {
     background: transparent;
     height: 0;
     border: none;
   }
-  .slider-col input[type='range']::-moz-range-track {
+  .slider-track input[type='range']::-moz-range-track {
     background: transparent;
     height: 0;
     border: none;
   }
 
-  .slider-col input[type='range']::-webkit-slider-thumb {
+  /* White pill thumb */
+  .slider-track input[type='range']::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     background: #fff;
-    border: 2px solid rgba(255, 255, 255, 0.9);
-    box-shadow:
-      0 0 0 1px rgba(0, 0, 0, 0.08),
-      0 2px 8px rgba(0, 0, 0, 0.32),
-      0 1px 3px rgba(0, 0, 0, 0.16);
+    border: 1px solid #c8c3b8;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.12);
     cursor: grab;
-    transition: transform 0.12s cubic-bezier(0.4, 0, 0.2, 1),
-                box-shadow 0.12s;
+    transition: transform 0.10s ease, box-shadow 0.10s ease;
   }
-  .slider-col input[type='range']:active::-webkit-slider-thumb {
-    transform: scale(1.25);
-    box-shadow:
-      0 0 0 1px rgba(0, 0, 0, 0.1),
-      0 4px 16px rgba(0, 0, 0, 0.4),
-      0 2px 6px rgba(0, 0, 0, 0.2);
+  .slider-track input[type='range']:active::-webkit-slider-thumb {
+    transform: scale(1.18);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
     cursor: grabbing;
   }
 
-  .slider-col input[type='range']::-moz-range-thumb {
-    width: 24px;
-    height: 24px;
+  .slider-track input[type='range']::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     background: #fff;
-    border: 2px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.32);
+    border: 1px solid #c8c3b8;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
     cursor: grab;
   }
 
-  /* ── Preview Panel ── */
-  .preview-panel {
-    flex: 1;
+  .slider-val {
+    font-size: 10px;
+    color: #555;
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    user-select: none;
+  }
+
+  /* ── Preview Pane (right column) ── */
+  .preview-pane {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     min-width: 0;
   }
 
   .preview-fill {
     flex: 1;
+    min-height: 220px;
     position: relative;
     transition: background-color 50ms ease;
   }
 
-  .preview-round {
+  .guess-round {
     position: absolute;
-    top: 18px;
-    left: 22px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    pointer-events: none;
+    top: 10px;
+    right: 12px;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    font-family: 'JetBrains Mono', monospace;
     user-select: none;
+    pointer-events: none;
   }
 
-  .preview-phase {
+  /* Submit button — floating above info strip */
+  .submit-btn {
     position: absolute;
-    top: 18px;
-    right: 20px;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    pointer-events: none;
-    user-select: none;
-  }
-
-  .btn-submit {
-    position: absolute;
-    bottom: 18px;
-    right: 18px;
-    width: 50px;
-    height: 50px;
+    bottom: 10px;
+    right: 10px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.22);
-    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
-                box-shadow 0.15s;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s;
     z-index: 5;
   }
-  .btn-submit:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.3);
+  .submit-btn:hover {
+    transform: scale(1.10);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.30);
   }
-  .btn-submit:active {
+  .submit-btn:active {
     transform: scale(0.92);
   }
 
+  /* ── Info strip ── */
   .info-strip {
-    background: #fff;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    padding: 10px 18px;
+    background: #F2EFE7;
+    border-top: 1px solid #c8c3b8;
+    padding: 9px 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -301,28 +315,32 @@
   }
 
   .strip-hsb {
-    font-size: 11px;
-    font-weight: 600;
-    color: #444;
-    letter-spacing: 0.02em;
+    font-size: 10px;
+    font-weight: 500;
+    color: #555;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.06em;
   }
 
   .strip-hex {
-    font-size: 11px;
-    font-weight: 400;
+    font-size: 10px;
     color: #aaa;
+    font-family: 'JetBrains Mono', monospace;
     letter-spacing: 0.04em;
     font-variant-numeric: tabular-nums;
-    font-family: ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
   }
 
-  @media (max-width: 440px) {
-    .slider-col {
-      width: 42px;
+  /* ── Responsive ── */
+  @media (max-width: 400px) {
+    .guess-layout {
+      grid-template-columns: 120px 1fr;
     }
-    .slider-col input[type='range'] {
-      width: 400px;
-      height: 42px;
+    .slider-track {
+      height: 68px;
+    }
+    .slider-track input[type='range'] {
+      width: 68px;
+      height: 100px;
     }
   }
 </style>

@@ -1,6 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte';
-  import { fade, fly, scale } from 'svelte/transition';
+  import { fade, fly } from 'svelte/transition';
   import { cubicOut } from 'svelte/easing';
   import ColorStage from './ColorStage.svelte';
   import Sliders from './Sliders.svelte';
@@ -20,11 +20,7 @@
   const dispatch = createEventDispatcher();
 </script>
 
-<div
-  class="w-full max-w-[520px] bg-white rounded-[22px] overflow-hidden"
-  style="box-shadow: 0 28px 72px rgba(0,0,0,0.10), 0 4px 18px rgba(0,0,0,0.06);"
-  in:scale={{ duration: 380, start: 0.96, easing: cubicOut }}
->
+<div class="game-content">
   {#if phase === 'memorize' && target}
     <div in:fade={{ duration: 180 }} out:fade={{ duration: 120 }}>
       <ColorStage
@@ -44,7 +40,7 @@
       />
     </div>
   {:else if phase === 'result' && currentResult}
-    <div in:fly={{ y: 16, duration: 280, easing: cubicOut }} out:fade={{ duration: 120 }}>
+    <div in:fly={{ y: 12, duration: 280, easing: cubicOut }} out:fade={{ duration: 120 }}>
       <ResultView
         result={currentResult}
         {round}
@@ -64,3 +60,9 @@
     </div>
   {/if}
 </div>
+
+<style>
+  .game-content {
+    width: 100%;
+  }
+</style>
