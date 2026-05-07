@@ -1,4 +1,4 @@
-# Dialed. — Premium UI (Svelte + Tailwind)
+# HUE. — Premium UI (Svelte + Tailwind)
 
 A color-guessing game UI built to match Dialed.gg quality standards, using DM Sans, custom vertical sliders, and smooth Svelte transitions.
 
