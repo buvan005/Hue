@@ -11,6 +11,7 @@ import {
 const HIGH_SCORE_KEY = 'd_hs';
 
 export const PHASES = {
+  START:    'start',
   MEMORIZE: 'memorize',
   GUESS:    'guess',
   RESULT:   'result',
@@ -41,7 +42,8 @@ function writeBestScore(score) {
 
 function createState() {
   return {
-    phase:         PHASES.MEMORIZE,
+    phase:         PHASES.START,
+    mode:          'standard', // 'standard' | 'daily'
     round:         0,
     total:         TOTAL_ROUNDS,
     target:        null,
@@ -75,12 +77,32 @@ function createGameStore() {
   return {
     subscribe,
 
-    /** Initialize / reset the game and start round 1. */
+    /** Initialize state to Start screen and load best score. */
     init() {
       const state = createState();
       state.bestScore = readBestScore();
+      state.phase = PHASES.START;
       set(state);
-      startRound();
+    },
+
+    /** Start the game from the beginning (Round 1). */
+    startGame(mode = 'standard') {
+      const state = createState();
+      state.bestScore = readBestScore();
+      state.mode = mode;
+      state.round = 1;
+      state.phase = PHASES.MEMORIZE;
+      state.target = createTargetColor();
+      state.guessHSB = createInitialGuess();
+      set(state);
+    },
+
+    /** Return to the Start Screen. */
+    goToStart() {
+      update((state) => ({
+        ...state,
+        phase: PHASES.START
+      }));
     },
 
     /** Transition from memorize → guess phase. */
@@ -134,12 +156,13 @@ function createGameStore() {
       });
     },
 
-    /** Full reset: new game from scratch. */
+    /** Full reset & retry: start new game from scratch. */
     restart() {
-      const state = createState();
-      state.bestScore = readBestScore();
-      set(state);
-      startRound();
+      this.startGame();
+    },
+
+    retry() {
+      this.startGame();
     }
   };
 }
