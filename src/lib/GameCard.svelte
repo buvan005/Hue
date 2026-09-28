@@ -9,6 +9,7 @@
   import EndModal from './EndModal.svelte';
 
   export let phase         = 'start';
+  export let username      = '';
   export let round         = 1;
   export let total         = 5;
   export let target        = null;
@@ -18,6 +19,10 @@
   export let totalScore    = 0;
   export let bestScore     = 0;
   export let isNewBest     = false;
+  export let userId        = null;
+  export let endStats      = null;
+  export let endStatsLoading = false;
+  export let endStatsError = null;
 
   const dispatch = createEventDispatcher();
 
@@ -40,8 +45,10 @@
     <div in:fade={{ duration: 300, easing: cubicInOut }}>
       <StartScreen
         {bestScore}
+        initialUsername={username}
         on:play
         on:daily
+        on:openStats
       />
     </div>
 
@@ -81,9 +88,16 @@
         {totalScore}
         {total}
         {isNewBest}
+        {bestScore}
+        {userId}
+        {username}
+        {endStats}
+        {endStatsLoading}
+        {endStatsError}
         on:retry
         on:playAgain
         on:home
+        on:viewLeaderboard
       />
     </div>
   {/if}

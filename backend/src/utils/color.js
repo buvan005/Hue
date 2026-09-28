@@ -1,9 +1,5 @@
-// ─── HSB / RGB / XYZ / LAB Conversions ──────────────────────────────────────
+// ─── HSB / RGB / XYZ / LAB Conversions (Server-side Engine) ─────────────────
 
-/**
- * Convert HSB (Hue 0-360, Saturation 0-100, Brightness 0-100) to RGB.
- * @returns {{ r: number, g: number, b: number }} — each 0-255
- */
 export function hsbToRgb(h, s, b) {
   const sat = s / 100;
   const bri = b / 100;
@@ -18,9 +14,6 @@ export function hsbToRgb(h, s, b) {
   };
 }
 
-/**
- * Linear-space sRGB → CIE XYZ (D65 illuminant).
- */
 export function rgbToXyz(r, g, b) {
   const linearize = (channel) => {
     const n = channel / 255;
@@ -36,9 +29,6 @@ export function rgbToXyz(r, g, b) {
   };
 }
 
-/**
- * CIE XYZ → CIELAB (D65 reference white).
- */
 export function xyzToLab(x, y, z) {
   const transform = (v) =>
     v > 0.008856 ? Math.cbrt(v) : 7.787 * v + 16 / 116;
@@ -56,18 +46,12 @@ export function xyzToLab(x, y, z) {
   };
 }
 
-/**
- * HSB → CIELAB (convenience pipeline).
- */
 export function hsbToLab(h, s, b) {
   const rgb = hsbToRgb(h, s, b);
   const xyz = rgbToXyz(rgb.r, rgb.g, rgb.b);
   return xyzToLab(xyz.x, xyz.y, xyz.z);
 }
 
-/**
- * CIE76 Delta E between two Lab colors.
- */
 export function deltaE(lab1, lab2) {
   return Math.sqrt(
     (lab1.L - lab2.L) ** 2 +
@@ -76,39 +60,19 @@ export function deltaE(lab1, lab2) {
   );
 }
 
-// ─── Display Helpers ────────────────────────────────────────────────────────
-
-/**
- * RGB → hex string (e.g. "#ff8800").
- */
 export function hex(r, g, b) {
   return `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
 }
 
-/**
- * HSB → hex string (convenience).
- */
 export function hsbHex(h, s, b) {
   const rgb = hsbToRgb(h, s, b);
   return hex(rgb.r, rgb.g, rgb.b);
 }
 
-/**
- * Perceived luminance (ITU-R BT.601).
- * > 145 = "light" background → use dark text
- * < 145 = "dark" background  → use light text
- */
-export function luma(r, g, b) {
-  return 0.299 * r + 0.587 * g + 0.114 * b;
-}
-
-// ─── Random Color Generators ────────────────────────────────────────────────
-
-function randomInt(min, max) {
+export function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-/** Random target color — biased toward saturated, mid-bright range. */
 export function randomTargetColor() {
   return {
     h: randomInt(0, 359),
@@ -117,24 +81,12 @@ export function randomTargetColor() {
   };
 }
 
-/** Predictable initial guess — starts Hue randomly but fixes Saturation and Brightness to 50. */
-export function randomGuessColor() {
-  return {
-    h: randomInt(0, 359),
-    s: 50,
-    b: 50
-  };
-}
-
-/**
- * Deterministic pseudo-random generator for Daily Challenge (seeded by date YYYY-MM-DD).
- * Matches backend implementation exactly.
- */
+// Pseudo-random deterministic generator for Daily Challenge (seeded by date YYYY-MM-DD)
 export function getDailyTargets(dateStr) {
-  const seed = dateStr || new Date().toISOString().split('T')[0];
+  // Simple deterministic mulberry32 PRNG based on date string hash
   let h = 0;
-  for (let i = 0; i < seed.length; i++) {
-    h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0;
+  for (let i = 0; i < dateStr.length; i++) {
+    h = Math.imul(31, h) + dateStr.charCodeAt(i) | 0;
   }
 
   function mulberry32() {
@@ -154,4 +106,3 @@ export function getDailyTargets(dateStr) {
   }
   return targets;
 }
-

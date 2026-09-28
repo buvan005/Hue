@@ -1,6 +1,8 @@
 <script>
   import { onMount } from 'svelte';
   import GameCard from './lib/GameCard.svelte';
+  import StatsModal from './lib/StatsModal.svelte';
+  import LeaderboardModal from './lib/LeaderboardModal.svelte';
   import { gameStore } from './stores/gameStore.js';
 
   let state = {
@@ -18,6 +20,8 @@
   };
 
   let soundEnabled = true;
+  let statsModalOpen = false;
+  let leaderboardModalOpen = false;
   let urlDisplay = 'localhost:5173';
 
   const chromeTitles = {
@@ -84,6 +88,20 @@
             <span class="nav-round-indicator">
               {state.mode === 'daily' ? 'DAILY · ' : ''}R{state.round} / {state.total}
             </span>
+            <button
+              class="nav-stats-btn"
+              on:click={() => (statsModalOpen = true)}
+              title="View Player Dossier & Statistics"
+            >
+              DOSSIER
+            </button>
+            <button
+              class="nav-stats-btn"
+              on:click={() => (leaderboardModalOpen = true)}
+              title="View Global Leaderboard"
+            >
+              LEADERBOARD
+            </button>
             <span class="nav-best">
               Best: {state.bestScore > 0 ? state.bestScore.toFixed(2) : '—'}
             </span>
@@ -109,8 +127,10 @@
       <!-- Main Game Card / View -->
       <GameCard
         phase={state.phase}
+        username={state.username}
+        userId={state.userId}
         round={state.round}
-        total={state.total}
+        total={state.totalRounds || state.total}
         target={state.target}
         guessHSB={state.guessHSB}
         currentResult={state.currentResult}
@@ -118,14 +138,38 @@
         totalScore={state.totalScore}
         bestScore={state.bestScore}
         isNewBest={state.isNewBest}
-        on:play={() => gameStore.startGame()}
-        on:daily={() => gameStore.startGame('daily')}
+        endStats={state.endStats}
+        endStatsLoading={state.endStatsLoading}
+        endStatsError={state.endStatsError}
+        on:play={(e) => { if (e.detail?.username) gameStore.startGame(e.detail.username); }}
+        on:daily={(e) => { if (e.detail?.username) gameStore.startGame(e.detail.username, 'daily'); }}
+        on:openStats={() => (statsModalOpen = true)}
         on:memorizeDone={() => gameStore.finishMemorize()}
         on:submit={(e) => gameStore.submitGuess(e.detail)}
         on:next={() => gameStore.nextRound()}
         on:retry={() => gameStore.restart()}
         on:playAgain={() => gameStore.restart()}
         on:home={() => gameStore.goToStart()}
+        on:viewLeaderboard={() => (leaderboardModalOpen = true)}
+      />
+
+      <StatsModal
+        isOpen={statsModalOpen}
+        userId={state.userId}
+        username={state.username || 'player'}
+        bestScore={state.bestScore}
+        on:close={() => (statsModalOpen = false)}
+      />
+
+      <LeaderboardModal
+        isOpen={leaderboardModalOpen}
+        currentUserId={state.userId}
+        currentUsername={state.username}
+        on:close={() => (leaderboardModalOpen = false)}
+        on:home={() => {
+          leaderboardModalOpen = false;
+          gameStore.goToStart();
+        }}
       />
 
       <!-- Global Footer Bar -->
@@ -265,6 +309,26 @@
     padding: 2px 8px;
     border-radius: 3px;
     border: 1px solid #C8C3B4;
+  }
+
+  .nav-stats-btn {
+    background: #D8D2C2;
+    border: 1px solid #BFB8A5;
+    color: #444;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 2px 6px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .nav-stats-btn:hover {
+    background: #1a1a1a;
+    color: #EDEAE0;
+    border-color: #1a1a1a;
   }
 
   .nav-best {

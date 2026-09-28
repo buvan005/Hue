@@ -1,135 +1,165 @@
-# HUE. — Premium UI (Svelte + Tailwind)
+# HUE — Online Color Memory Game
 
-A color-guessing game UI built to match Dialed.gg quality standards, using DM Sans, custom vertical sliders, and smooth Svelte transitions.
+A perceptual color memory browser game built with **Svelte 5 + Vite** and a server-authoritative **Node.js + Fastify 5 + Prisma (PostgreSQL)** backend.
+
+Players memorize an exact color swatch, recreate it from memory using Hue, Saturation, and Brightness (HSB) sliders, and get scored based on **CIE76 $\Delta E$ perceptual color difference in CIELAB color space**.
 
 ---
 
-## Folder Structure
+## Features
+
+- **Username-Based Identity**: Instant play with case-insensitive unique usernames stored in `localStorage`. No passwords or email barriers.
+- **Server-Authoritative Gameplay**: Round targets and scores are validated and scored on the server to prevent client manipulation.
+- **Graceful Offline Fallback**: If the backend or database is unreachable, the game transitions seamlessly to local offline mode with local scoring and zero interruptions.
+- **Deterministic Daily Challenge**: Both backend and frontend share a date-seeded PRNG (`mulberry32`) so all players worldwide receive the exact same 5 colors each day.
+- **Global Leaderboard**: Real-time rankings with period filters (`TODAY`, `WEEK`, `ALL`) and responsive score progress bars.
+- **Player Dossier & Statistics**: View total games played, personal best, average score, global ranking, percentile calculation, and recent game history.
+- **Aesthetic Terminal Design**: JetBrains Mono typography, macOS window frame, retro beige `#EDEAE0` backdrop, and interactive 72-swatch pixel art grid.
+
+---
+
+## Tech Stack
+
+| Layer | Technology | Details |
+|---|---|---|
+| **Frontend** | Svelte 5 + Vite | JetBrains Mono, CSS design system, responsive |
+| **Backend** | Node.js + Fastify 5 | Modular architecture, rate limiting (120 req/min), CORS |
+| **ORM & Database** | Prisma ORM + PostgreSQL | `users`, `games`, `rounds` tables with cascade deletes & indices |
+| **Color Engine** | CIELAB $\Delta E$ | HSB $\leftrightarrow$ RGB $\leftrightarrow$ CIE XYZ $\leftrightarrow$ CIELAB conversion pipeline |
+| **Validation** | Zod schemas | Strict request validation for usernames, games, and HSB coordinates |
+
+---
+
+## Project Structure
 
 ```
-dialed/
+HUE/
 ├── src/
-│   ├── App.svelte              ← Root: state, game loop, header/footer
-│   ├── index.html              ← Standalone demo (Tailwind CDN, no build needed)
-│   └── lib/
-│       ├── GameCard.svelte     ← Card container, phase routing, transitions
-│       ├── ColorStage.svelte   ← Memorize phase (timer bar, countdown, GO reveal)
-│       ├── Sliders.svelte      ← Vertical HSB sliders + live preview + submit
-│       ├── ResultView.svelte   ← Split card: guess vs target, score reveal
-│       ├── ScoreDisplay.svelte ← Reusable animated count-up number
-│       └── EndModal.svelte     ← Dark results screen: breakdown strip, share
+│   ├── api/                    # Frontend REST API client
+│   │   ├── client.js           # Base HTTP request wrapper & error handling
+│   │   ├── games.js            # Game session & round submission
+│   │   ├── leaderboard.js      # Global leaderboard fetching
+│   │   ├── stats.js            # Player dossier / stats fetching
+│   │   └── users.js            # User creation & lookup
+│   ├── engine/                 # Core mathematical color engine
+│   │   ├── color.js            # HSB/RGB/XYZ/LAB conversions, ΔE, and daily PRNG
+│   │   ├── game.js             # Round result computation and target creation
+│   │   └── scoring.js          # Linear ΔE falloff (10 * (1 - ΔE/100)) & messages
+│   ├── lib/                    # Svelte components
+│   │   ├── App.svelte          # Main window chrome, topnav, routing
+│   │   ├── StartScreen.svelte  # Start screen: pixel art grid, identity, leaderboard
+│   │   ├── ColorStage.svelte   # Memorize phase: 5s countdown
+│   │   ├── Sliders.svelte      # Guess phase: interactive HSB slider tracks
+│   │   ├── ResultView.svelte   # Result phase: side-by-side guess vs target & score
+│   │   ├── EndModal.svelte     # Game complete summary, round breakdown, retry
+│   │   └── StatsModal.svelte   # Player dossier & stats modal
+│   └── stores/
+│       └── gameStore.js        # Central Svelte reactive store with offline fallback
+├── backend/
+│   ├── prisma/
+│   │   ├── schema.prisma       # Prisma schema for PostgreSQL
+│   │   └── seed.js             # Realistic test seed script
+│   ├── src/
+│   │   ├── middleware/         # Zod validation middleware
+│   │   ├── routes/             # Fastify REST endpoints (/users, /games, /leaderboard, /stats)
+│   │   ├── services/           # Business logic: game, scoring, stats, user
+│   │   ├── utils/              # Color math, Prisma client singleton
+│   │   ├── app.js              # Fastify application builder
+│   │   └── server.js           # Entrypoint with graceful shutdown
+│   └── tests/                  # Backend unit & integration tests
+└── tests/                      # Frontend core logic tests
 ```
 
 ---
 
-## Quick Start (Svelte)
+## Quick Start
+
+### 1. Run the Frontend (Vite)
 
 ```bash
-npm create vite@latest dialed -- --template svelte
-cd dialed
+# In project root:
 npm install
-npm install -D tailwindcss autoprefixer
-npx tailwindcss init
-
-# Add to tailwind.config.js content:
-# './src/**/*.{svelte,js,html}'
-
-# Copy src/ files from this package
 npm run dev
 ```
 
-### tailwind.config.js
-```js
-export default {
-  content: ['./src/**/*.{svelte,js,html}'],
-  theme: {
-    extend: {
-      fontFamily: {
-        sans: ['DM Sans', 'sans-serif'],
-      },
-    },
-  },
-}
+Frontend runs at `http://localhost:5173/`.
+
+### 2. Run the Backend (Fastify)
+
+```bash
+cd backend
+npm install
+
+# Configure environment variables (copy .env.example)
+cp .env.example .env
+
+# Generate Prisma Client:
+npm run prisma:generate
+
+# Start development server:
+npm run dev
 ```
 
-### app.css (global)
-```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+Backend runs at `http://localhost:3000/`.
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&display=swap');
+---
+
+## Database Setup (PostgreSQL)
+
+You can use either a **local PostgreSQL database** or a **free cloud database** (e.g. [Neon](https://neon.tech), [Railway](https://railway.app), or [Supabase](https://supabase.com)).
+
+1. Set your `DATABASE_URL` in `backend/.env`:
+   ```env
+   DATABASE_URL="postgresql://postgres:password@localhost:5432/huedb?schema=public"
+   ```
+
+2. Run Prisma migrations:
+   ```bash
+   cd backend
+   npx prisma migrate dev --name init
+   ```
+
+3. (Optional) Seed demo players and leaderboard scores:
+   ```bash
+   npm run prisma:seed
+   ```
+
+---
+
+## Running Automated Tests
+
+### Frontend Core Engine Tests
+```bash
+npm test
 ```
+Tests username validation, normalization, HSB $\leftrightarrow$ RGB $\leftrightarrow$ LAB color conversion, $\Delta E$ accuracy, scoring formula, and deterministic daily challenge seed generators.
+
+### Backend API & Service Tests
+```bash
+cd backend
+npm test
+```
+Tests Fastify health endpoint, input validation schemas, scoring engine, user normalization, and daily challenge PRNG.
 
 ---
 
-## Standalone Demo
+## Production Deployment
 
-Open `src/index.html` directly in any browser — no build step needed. Uses Tailwind CDN and vanilla JS to simulate the Svelte component structure.
+### Frontend (Vercel / Netlify)
+1. Set the root directory or configure build command: `npm run build`.
+2. Set output directory: `dist`.
+3. Set environment variable:
+   ```env
+   VITE_API_URL=https://your-backend-domain.com
+   ```
 
----
-
-## Design System
-
-| Token | Value |
-|-------|-------|
-| Background | `#efeeec` (warm off-white) |
-| Card | `#ffffff` |
-| Card shadow | `0 32px 80px rgba(0,0,0,0.11)` |
-| End screen | `#0d0d0d` |
-| Font | DM Sans (300–900) |
-| Border radius | `rounded-3xl` (24px) |
-| Score accent | `#e8b84b` (gold) |
-
-### Transition Timing
-- Phase fade-in: `280ms cubic-bezier(0.4,0,0.2,1)`
-- Score count-up: `900ms` ease-out cubic
-- Button hover: `150ms`
-- Timer bar: linear, matches MEM_MS
-
----
-
-## Component API
-
-### `<ColorStage>`
-| Prop | Type | Description |
-|------|------|-------------|
-| `target` | `{h,s,b}` | Target color |
-| `round` | `number` | Current round |
-| `total` | `number` | Total rounds |
-| `colorMath` | `object` | Color utility object |
-| `on:done` | event | Fires when memorize phase ends |
-
-### `<Sliders>`
-| Prop | Type | Description |
-|------|------|-------------|
-| `initial` | `{h,s,b}` | Starting slider values |
-| `colorMath` | `object` | Color utility object |
-| `on:submit` | event | `{ detail: {h,s,b} }` |
-
-### `<ResultView>`
-| Prop | Type | Description |
-|------|------|-------------|
-| `result` | object | `{ score, dE, guess, target, msg }` |
-| `on:next` | event | Fires on next button |
-
-### `<EndModal>`
-| Prop | Type | Description |
-|------|------|-------------|
-| `rounds` | array | All round results |
-| `totalScore` | number | Sum of scores |
-| `isNewBest` | boolean | Show PB badge |
-| `on:playAgain` | event | Reset and restart |
-
----
-
-## Key UX Decisions
-
-- **DM Sans** instead of Inter — heavier, more confident numerics
-- **Warm gray background** (`#efeeec`) — less clinical than pure white/gray
-- **Vertical sliders** with custom `-webkit-slider-thumb` for touch-friendly drag
-- **Adaptive contrast** — button and text colors invert based on luminance of the active color
-- **Diagonal breakdown** strip — guess color fills top-left triangle, target fills bottom-right
-- **Score count-up** starts at 0, eases to final value for anticipation
-- **dE (Delta E) badge** shown on result screen for advanced players
-- **`prefers-reduced-motion`** not yet wired — add via Svelte's `prefersReducedMotion` store if needed
+### Backend (Railway / Render / Fly.io)
+1. Deploy from the `backend/` directory or root with root directory set to `backend`.
+2. Build command: `npm run prisma:generate && npm run prisma:deploy`.
+3. Start command: `npm start`.
+4. Environment variables:
+   ```env
+   PORT=3000
+   DATABASE_URL=postgresql://user:pass@host:5432/dbname?sslmode=require
+   FRONTEND_URL=https://your-frontend-domain.com
+   ```

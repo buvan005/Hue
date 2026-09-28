@@ -1,0 +1,62 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                  String   @id @default(uuid())
+  username            String
+  username_normalized String   @unique
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  games Game[]
+
+  @@map("users")
+}
+
+model Game {
+  id               String    @id @default(uuid())
+  user_id          String
+  status           String    @default("IN_PROGRESS") // CREATED, IN_PROGRESS, COMPLETED, ABANDONED
+  total_score      Float     @default(0.0)
+  rounds_completed Int       @default(0)
+  mode             String    @default("standard") // standard, daily
+  started_at       DateTime  @default(now())
+  completed_at     DateTime?
+  created_at       DateTime  @default(now())
+
+  user   User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  rounds Round[]
+
+  @@index([user_id])
+  @@index([status])
+  @@index([total_score(sort: Desc)])
+  @@index([created_at])
+  @@map("games")
+}
+
+model Round {
+  id             String   @id @default(uuid())
+  game_id        String
+  round_number   Int
+  target_h       Int
+  target_s       Int
+  target_b       Int
+  guess_h        Int?
+  guess_s        Int?
+  guess_b        Int?
+  score          Float?
+  color_distance Float?
+  created_at     DateTime @default(now())
+
+  game Game @relation(fields: [game_id], references: [id], onDelete: Cascade)
+
+  @@unique([game_id, round_number])
+  @@index([game_id])
+  @@map("rounds")
+}

@@ -1,5 +1,6 @@
 import {
   deltaE,
+  getDailyTargets,
   hsbHex,
   hsbToLab,
   hsbToRgb,
@@ -17,10 +18,19 @@ export function createTargetColor() {
   return randomTargetColor();
 }
 
+/** Generate daily challenge targets for today or a specific date. */
+export { getDailyTargets };
+
+export function createDailyTarget(roundIndex = 0, dateStr = null) {
+  const targets = getDailyTargets(dateStr);
+  return targets[roundIndex] || targets[0];
+}
+
 /** Generate a random initial guess (offset from neutral). */
 export function createInitialGuess() {
   return randomGuessColor();
 }
+
 
 /**
  * Compute the result for a single round.
