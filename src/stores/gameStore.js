@@ -12,6 +12,7 @@ import {
   submitRound as apiSubmitRound,
   completeGame as apiCompleteGame
 } from '../api/games.js';
+import { API_BASE } from '../api/client.js';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -96,9 +97,6 @@ function writeStoredUserId(id) {
 }
 
 // ─── Network helpers ──────────────────────────────────────────────────────────
-
-const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL)
-  || 'http://localhost:3000';
 
 async function checkBackendOnline() {
   try {
@@ -291,12 +289,14 @@ function createGameStore() {
     submitGuess(guess) {
       let capturedRound = 0;
       let capturedGameId = null;
+      let capturedUserId = null;
       let capturedOnline = false;
 
       update((state) => {
         if (state.phase !== PHASES.GUESS || !state.target) return state;
         capturedRound   = state.round;
         capturedGameId  = state.gameId;
+        capturedUserId  = state.userId;
         capturedOnline  = state.isOnline;
 
         const result = createRoundResult(state.target, guess);
@@ -314,7 +314,7 @@ function createGameStore() {
 
       // Fire-and-forget server submission
       if (capturedGameId && capturedOnline) {
-        apiSubmitRound(capturedGameId, capturedRound, guess).then((data) => {
+        apiSubmitRound(capturedGameId, capturedRound, guess, capturedUserId).then((data) => {
           const serverScore = data?.score ?? data?.roundScore ?? null;
           update((s) => {
             const patch = {};
@@ -355,11 +355,12 @@ function createGameStore() {
         if (state.round >= state.totalRounds) {
           const isNewBest = writeBestScore(state.totalScore);
           const finishingGameId = state.gameId;
+          const finishingUserId = state.userId;
 
           // Complete game on server (capturing stats)
           if (finishingGameId && state.isOnline) {
             _patchState({ endStatsLoading: true, endStatsError: null });
-            apiCompleteGame(finishingGameId).then((data) => {
+            apiCompleteGame(finishingGameId, finishingUserId).then((data) => {
               update((s) => {
                 // Ignore stale response if the player moved to a different game
                 if (s.gameId !== finishingGameId) return s;

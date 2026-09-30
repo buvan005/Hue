@@ -22,7 +22,7 @@ model User {
 model Game {
   id               String    @id @default(uuid())
   user_id          String
-  status           String    @default("IN_PROGRESS") // CREATED, IN_PROGRESS, COMPLETED, ABANDONED
+  status           String    @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED, ABANDONED
   total_score      Float     @default(0.0)
   rounds_completed Int       @default(0)
   mode             String    @default("standard") // standard, daily
@@ -37,6 +37,8 @@ model Game {
   @@index([status])
   @@index([total_score(sort: Desc)])
   @@index([created_at])
+  @@index([status, completed_at])
+  @@index([status, total_score(sort: Desc)])
   @@map("games")
 }
 

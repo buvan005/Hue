@@ -1,6 +1,6 @@
-// ─── Frontend Base API Client ─────────────────────────────────────────────
+// ─── Frontend Centralized API Client ─────────────────────────────────────────
 
-const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL)
+export const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL)
   || 'http://localhost:3000';
 
 export class ApiError extends Error {
@@ -30,6 +30,9 @@ export async function request(path, options = {}) {
     const data = isJson ? await res.json() : await res.text();
 
     if (!res.ok) {
+      if (res.status === 429) {
+        throw new ApiError('Too many requests. Please wait a moment before trying again.', 429, data);
+      }
       const errorMsg = data?.message || data?.error || `HTTP ${res.status}: ${res.statusText}`;
       throw new ApiError(errorMsg, res.status, data);
     }
@@ -41,7 +44,7 @@ export async function request(path, options = {}) {
     }
     // Network or connection failure
     throw new ApiError(
-      `Unable to connect to game server (${err.message || 'Network error'}).`,
+      'Unable to connect to game server. Running in offline mode.',
       0,
       null
     );

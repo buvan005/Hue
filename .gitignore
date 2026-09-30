@@ -1,0 +1,57 @@
+# Environment variables
+.env
+.env.*
+*.env
+**/*.env
+!.env.example
+!.env.*.example
+!**/.env.example
+!**/.env.*.example
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+dist/
+build/
+**/dist/
+**/build/
+
+# Logs
+*.log
+logs/
+logfile
+**/logfile*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+*.tmp*
+
+# Test/coverage output
+coverage/
+.nyc_output/
+
+# Local databases & embedded storage
+*.db
+*.sqlite
+*.sqlite3
+backend/data/
+**/data/db/
+
+# Prisma & engine temporary files
+**/query_engine*.node.tmp*

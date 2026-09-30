@@ -69,7 +69,7 @@ export async function createGame(userId, mode = 'standard') {
   };
 }
 
-export async function submitRound(gameId, roundNumber, guess) {
+export async function submitRound(gameId, roundNumber, guess, userId = null) {
   // Validate guess values
   if (
     typeof guess?.h !== 'number' || guess.h < 0 || guess.h > 360 ||
@@ -89,6 +89,13 @@ export async function submitRound(gameId, roundNumber, guess) {
   if (!game) {
     const err = new Error('Game not found.');
     err.statusCode = 404;
+    throw err;
+  }
+
+  // Verify ownership if requested
+  if (userId && game.user_id !== userId) {
+    const err = new Error('Unauthorized: game does not belong to this user.');
+    err.statusCode = 403;
     throw err;
   }
 
@@ -132,6 +139,13 @@ export async function submitRound(gameId, roundNumber, guess) {
     throw err;
   }
 
+  // Prevent duplicate submission for this round
+  if (currentRoundRow.score !== null) {
+    const err = new Error(`Round ${roundNumber} has already been submitted.`);
+    err.statusCode = 400;
+    throw err;
+  }
+
   const target = {
     h: currentRoundRow.target_h,
     s: currentRoundRow.target_s,
@@ -163,8 +177,7 @@ export async function submitRound(gameId, roundNumber, guess) {
       data: {
         rounds_completed: newCompletedCount,
         total_score: newTotalScore,
-        status: isFinished ? 'COMPLETED' : 'IN_PROGRESS',
-        completed_at: isFinished ? new Date() : null
+        status: 'IN_PROGRESS'
       }
     });
 
@@ -207,7 +220,7 @@ export async function submitRound(gameId, roundNumber, guess) {
   };
 }
 
-export async function completeGame(gameId) {
+export async function completeGame(gameId, userId = null) {
   const game = await prisma.game.findUnique({
     where: { id: gameId },
     include: {
@@ -222,19 +235,48 @@ export async function completeGame(gameId) {
     throw err;
   }
 
-  // Calculate authoritative total from completed rounds
+  // Verify ownership if requested
+  if (userId && game.user_id !== userId) {
+    const err = new Error('Unauthorized: game does not belong to this user.');
+    err.statusCode = 403;
+    throw err;
+  }
+
+  // Prevent re-completing already completed games
+  if (game.status === 'COMPLETED') {
+    const err = new Error('Game is already completed.');
+    err.statusCode = 400;
+    throw err;
+  }
+
+  // Check for missing rounds (all 5 rounds required)
   const validRounds = game.rounds.filter((r) => r.score !== null);
+  if (validRounds.length < TOTAL_ROUNDS) {
+    const err = new Error(`Cannot complete game: missing rounds (${validRounds.length}/${TOTAL_ROUNDS} completed).`);
+    err.statusCode = 400;
+    throw err;
+  }
+
+  // Calculate authoritative total from completed rounds
   const totalScore = Number(validRounds.reduce((acc, r) => acc + (r.score || 0), 0).toFixed(2));
 
-  // Ensure game is updated with authoritative total_score and status COMPLETED
-  await prisma.game.update({
-    where: { id: gameId },
-    data: {
-      status: 'COMPLETED',
-      completed_at: game.completed_at || new Date(),
-      total_score: totalScore,
-      rounds_completed: validRounds.length
+  // Atomic completion in transaction
+  await prisma.$transaction(async (tx) => {
+    const latest = await tx.game.findUnique({ where: { id: gameId } });
+    if (latest.status === 'COMPLETED') {
+      const err = new Error('Game is already completed.');
+      err.statusCode = 400;
+      throw err;
     }
+    await tx.game.update({
+      where: { id: gameId },
+      data: {
+        status: 'COMPLETED',
+        completed_at: game.completed_at || new Date(),
+        total_score: totalScore,
+        rounds_completed: validRounds.length
+      }
+    });
   });
   const finalStatus = 'COMPLETED';
 

@@ -110,7 +110,7 @@ You can use either a **local PostgreSQL database** or a **free cloud database** 
 
 1. Set your `DATABASE_URL` in `backend/.env`:
    ```env
-   DATABASE_URL="postgresql://postgres:password@localhost:5432/huedb?schema=public"
+   DATABASE_URL="postgresql://<USER>:<PASSWORD>@localhost:5432/huedb?schema=public"
    ```
 
 2. Run Prisma migrations:

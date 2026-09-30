@@ -90,14 +90,16 @@ test('Leaderboard & Ranking — Tie-breaking uses timestamp of personal-best gam
   const timeEarly = new Date(Date.now() - 50000);
   const timeLate = new Date(Date.now() - 10000);
 
-  // userT1 achieves 48.0 earlier
+  const uniqueTieScore = 47.791;
+
+  // userT1 achieves score earlier
   await prisma.game.create({
-    data: { user_id: userT1.id, status: 'COMPLETED', total_score: 48.0, completed_at: timeEarly }
+    data: { user_id: userT1.id, status: 'COMPLETED', total_score: uniqueTieScore, completed_at: timeEarly }
   });
 
-  // userT2 achieves 48.0 later
+  // userT2 achieves score later
   await prisma.game.create({
-    data: { user_id: userT2.id, status: 'COMPLETED', total_score: 48.0, completed_at: timeLate }
+    data: { user_id: userT2.id, status: 'COMPLETED', total_score: uniqueTieScore, completed_at: timeLate }
   });
 
   const lb = await buildPlayerLeaderboard('all');
@@ -106,8 +108,8 @@ test('Leaderboard & Ranking — Tie-breaking uses timestamp of personal-best gam
 
   assert.ok(t1, 'User T1 must be present');
   assert.ok(t2, 'User T2 must be present');
-  assert.strictEqual(t1.bestScore, 48.0);
-  assert.strictEqual(t2.bestScore, 48.0);
+  assert.strictEqual(t1.bestScore, uniqueTieScore);
+  assert.strictEqual(t2.bestScore, uniqueTieScore);
 
   // Earlier completion ranks first
   assert.strictEqual(t1.rank + 1, t2.rank, 'Earlier personal best must rank higher in tie-break');

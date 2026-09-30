@@ -7,16 +7,22 @@ export async function startGame(userId, mode = 'standard') {
   });
 }
 
-export async function submitRound(gameId, roundNumber, guess) {
+export async function submitRound(gameId, roundNumber, guess, userId = null) {
   return request(`/api/games/${gameId}/rounds`, {
     method: 'POST',
-    body: JSON.stringify({ roundNumber, guess })
+    body: JSON.stringify({
+      roundNumber,
+      guess,
+      ...(userId ? { userId } : {})
+    })
   });
 }
 
-export async function completeGame(gameId) {
+export async function completeGame(gameId, userId = null) {
   return request(`/api/games/${gameId}/complete`, {
     method: 'POST',
-    body: JSON.stringify({})
+    body: JSON.stringify({
+      ...(userId ? { userId } : {})
+    })
   });
 }

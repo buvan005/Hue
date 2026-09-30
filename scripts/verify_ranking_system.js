@@ -121,7 +121,7 @@ async function runRankingSystemAudit() {
 
   // 4. Test TODAY Leaderboard
   console.log('\n--- 4. Testing TODAY Leaderboard ---');
-  const todayRes = await fetch(`${API_BASE}/api/leaderboard?period=today&limit=50`);
+  const todayRes = await fetch(`${API_BASE}/api/leaderboard?period=today&limit=100`);
   const todayData = await todayRes.json();
   const todayEntries = todayData.entries;
 
@@ -138,7 +138,7 @@ async function runRankingSystemAudit() {
 
   // 5. Test WEEK Leaderboard
   console.log('\n--- 5. Testing WEEK Leaderboard ---');
-  const weekRes = await fetch(`${API_BASE}/api/leaderboard?period=week&limit=50`);
+  const weekRes = await fetch(`${API_BASE}/api/leaderboard?period=week&limit=100`);
   const weekData = await weekRes.json();
   const weekNames = weekData.entries.map(e => e.username);
   console.log(`WEEK Leaderboard players: ${weekNames.join(', ')}`);

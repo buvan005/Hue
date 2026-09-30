@@ -52,10 +52,15 @@ export async function ensurePostgresRunning() {
       // Already initialized
     }
     await pgInstance.start();
+    try {
+      await pgInstance.createDatabase('huedb');
+    } catch {
+      // Already exists
+    }
     console.log('✓ Embedded PostgreSQL active on port 5432 (database: huedb).');
     return pgInstance;
   } catch (err) {
-    console.warn('⚠️ Could not start embedded PostgreSQL:', err.message);
+    console.warn('⚠️ Could not start embedded PostgreSQL:', err?.message || err);
     return null;
   }
 }
