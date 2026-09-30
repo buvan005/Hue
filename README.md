@@ -6,14 +6,14 @@ Built with **Svelte + Vite** on the frontend, a server-authoritative **Node.js +
 
 ---
 
-## 🎮 Live Demo
+# Live Demo
 
 **Play HUE:** [https://hue-azure.vercel.app](https://hue-azure.vercel.app)  
 **GitHub Repository:** [https://github.com/buvan005/Hue](https://github.com/buvan005/Hue)
 
 ---
 
-## 📖 Overview
+##  Overview
 
 **HUE** tests your visual recall and color sensitivity across five quick, focused rounds.
 
@@ -25,7 +25,7 @@ Built with **Svelte + Vite** on the frontend, a server-authoritative **Node.js +
 
 ---
 
-## ✨ Features
+##  Features
 
 - **Username-Based Identity**: Instant play with case-insensitive unique usernames saved to `localStorage`—no passwords or account setup barriers required.
 - **Color Memorization Stage**: A 5-second countdown window displays the target swatch before hiding it for reproduction.
@@ -47,7 +47,7 @@ Built with **Svelte + Vite** on the frontend, a server-authoritative **Node.js +
 
 ---
 
-## 🕹️ Game Logic
+##  Game Logic
 
 HUE follows a strictly enforced state machine across both client and server:
 
@@ -88,7 +88,7 @@ START ──► MEMORIZE ──► GUESS ──► RESULT ──► NEXT ROUND �
 
 ---
 
-## 🎨 Color Matching & Scoring
+##  Color Matching & Scoring
 
 HUE calculates color accuracy based on human visual perception rather than simple RGB Euclidean distance.
 
@@ -147,7 +147,7 @@ $$\text{Final Score} = \sum_{r=1}^{5} \text{Round Score}_r \quad (\text{Maximum:
 
 ---
 
-## 🏆 Leaderboard & Ranking
+##  Leaderboard & Ranking
 
 HUE provides a deduplicated, server-authoritative leaderboard accessible from the start and end screens.
 
@@ -162,7 +162,7 @@ HUE provides a deduplicated, server-authoritative leaderboard accessible from th
 
 ---
 
-## 📊 Player Performance
+## Player Performance
 
 Upon completing a game or opening the dossier, players receive comprehensive analytics:
 
@@ -177,7 +177,7 @@ $$\text{Percentile} = \left\lfloor \frac{\text{Unique Players with Strictly Lowe
 
 ---
 
-## 🏗️ Application Architecture
+##  Application Architecture
 
 ```mermaid
 flowchart LR
@@ -215,7 +215,7 @@ flowchart LR
 
 ---
 
-## 💻 Local Development
+##  Local Development
 
 ### Prerequisites
 - Node.js (v18+)
@@ -262,6 +262,6 @@ npm test
 
 ---
 
-## 📄 License
+##  License
 
 MIT © [buvan005](https://github.com/buvan005)
